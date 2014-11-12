@@ -24,6 +24,6 @@ for line in f.readlines():
     gender = splits[1]
     dob = splits[2]
     age = datetime.datetime.now().year - int(dob.split('-')[0])
-    print state_abv[state.strip()], gender, age
+    print state_abv[state.strip()]+','+ gender.strip()+','+ str(age)
 
 f.close()
