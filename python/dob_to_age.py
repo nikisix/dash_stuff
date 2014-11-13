@@ -2,7 +2,7 @@
 import datetime
 
 #load state abrev
-f1 = file('state_abbreviations.csv')
+f1 = file('../assets/csv/state_abbreviations.csv')
 f1.readline()
 f1.readline()
 state_abv = {}
@@ -14,7 +14,7 @@ for line in f1.readlines():
 f1.close()
 
 
-f = file('state_gender_dob.csv')
+f = file('../assets/csv/state_gender_dob.csv')
 f.readline()
 f.readline() #burn first two header lines
 
