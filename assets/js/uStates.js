@@ -213,6 +213,10 @@
       d3.select('#tooltip').html(toolTip(d.n, data[d.id]))
         .style('left', (d3.event.pageX) + 'px')
         .style('top', (d3.event.pageY - 28) + 'px');
+    
+      var nD = [{type:'men', freq:data[d.id].men},{type:'women', freq:data[d.id].women}];
+      //pC.update(nD);
+      //leg.update(nD);
     }
 
     function mouseOut() {
