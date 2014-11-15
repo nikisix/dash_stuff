@@ -214,9 +214,11 @@
         .style('left', (d3.event.pageX) + 'px')
         .style('top', (d3.event.pageY - 28) + 'px');
     
-      var nD = [{type:'men', freq:data[d.id].men},{type:'women', freq:data[d.id].women}];
-      //pC.update(nD);
-      //leg.update(nD);
+      var nD = [{type:'male', freq:data[d.id].male},{type:'female', freq:data[d.id].female}];
+      dashboard.pC.update(nD);
+      dashboard.leg.update(nD);
+      //var fD = 
+      //dashboard.hG.update(nD);
     }
 
     function mouseOut() {
