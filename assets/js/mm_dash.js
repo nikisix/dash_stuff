@@ -34,7 +34,7 @@ d3.csv('assets/csv/st_abv_gender_age.csv', function(res){
     national_age_dist_female = {};
     national_age_dist_total = {};
 
-  _.each(national, function(state, state_abv) {
+  _.each(national, function(state, state_abv) { //every state in nation
     outer_state[state_abv] = {};
     state.color = '#ccc';
 
@@ -49,7 +49,7 @@ d3.csv('assets/csv/st_abv_gender_age.csv', function(res){
     state.age_dist_female = {};
     state.age_dist_total = {};
 
-    _.each(state, function(s) {
+    _.each(state, function(s) { //every entry in state
         sum += parseInt(s.age);
         bucket = Math.floor(s.age/national_bucket_size);
         age_range_lower = bucket * national_bucket_size;
@@ -77,24 +77,3 @@ d3.csv('assets/csv/st_abv_gender_age.csv', function(res){
     uStates.draw('#statesvg', national, tooltipHtml);
     dashboard('#dashboard', national);
 });
-
-    //for each age in the age_distribution. keys should be the same for male and female
-//    var freq_data = [];//key is bucket number
-//    _.each(state.age_dist_male, function(value, key) {
-//        var youngest = key * national_bucket_size;
-//        var oldest = (key+1) * national_bucket_size;
-//        var age_range = youngest.toString() + '-' + oldest.toString();
-//        var freq = {};
-//        var freq_data_entry = {};
-//        freq['male']   = key in state.age_dist_male ? state.age_dist_male[key] : 0;
-//        freq['female'] = key in state.age_dist_female ? state.age_dist_female[key] : 0;
-//        freq_data_entry['age_range'] = age_range;
-//        freq_data_entry['freq'] = freq;
-//        freq_data.push(freq_data_entry);
-//    });
-
-//    outer_state[state_abv]['male'] = male; 
-//    outer_state[state_abv]['female'] = female;
-//    //outer_state[state_abv][freq_data]       = freq_data;
-//    outer_state[state_abv]['age_dist_male']   = age_dist_male;
-//    outer_state[state_abv]['age_dist_female'] = age_dist_female;

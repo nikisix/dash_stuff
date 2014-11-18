@@ -2,24 +2,6 @@ function dashboard(id, fData){
     var barColor = 'steelblue';
     function segColor(c){ return {male:"#807dba", female:"#e08214"}[c]; }
     
-    //fData.forEach(function(d){
-        //d.total=d.freq.male+d.freq.female;
-    //compute total for each state.
-//    _.each(fData, function(state_list, state_abv) {
-//        console.log(state_abv);
-//        _.each(state_list, function(state) {
-//            var state_males   = 0;
-//            var state_females = 0;
-//            state.forEach(function(age_range) { 
-//                age_range.freq.total = age_range.freq.male + age_range.freq.female;
-//                state_males   += age_range.freq.male;
-//                state_females += age_range.freq.female;
-//                //console.log(age_range); 
-//            });
-//            state_list
-//        });
-//    });
-    
     // function to handle histogram.
     function histoGram(fD){
         var hG={},    hGDim = {t: 60, r: 0, b: 30, l: 0};
@@ -67,10 +49,12 @@ function dashboard(id, fData){
             .attr("text-anchor", "middle");
         
         function mouseover(d){  // utility function to be called on mouseover.
-            // filter for selected state.
-            var st = fData.filter(function(s){ return s.age_range == d[0];})[0],
-                nD = d3.keys(st.freq).map(function(s){ return {type:s, freq:st.freq[s]};});
-               
+            //console.log(d); //["18-36", 516] ["age-range", count]
+            //genders_per_age_range
+            nD = [];
+            nD.push({"type":"male",   "freq":fData.age_dist_male[d[0]]});
+            nD.push({"type":"female", "freq":fData.age_dist_female[d[0]]});
+           
             // call update functions of pie-chart and legend.    
             pC.update(nD);
             leg.update(nD);
@@ -134,14 +118,25 @@ function dashboard(id, fData){
         // Utility function to be called on mouseover a pie slice.
         function mouseover(d){
             // call the update function of histogram with new data.
-            hG.update(fData.map(function(v){ 
-                return [v.age_range, v.freq[d.data.type]];}), segColor(d.data.type));
+            //console.log(d.data.type); //male or female
+            hist_data = [];
+            if(d.data.type == 'male'){
+//                console.log('using male map');
+                _.each(age_ranges, function(range) {
+                    hist_data.push([range, fData.age_dist_male[range]]);
+                });
+            } else {
+//                console.log('using female map');
+                _.each(age_ranges, function(range) {
+                    hist_data.push([range, fData.age_dist_female[range]]);
+                });
+            }    
+            hG.update(hist_data);
         }
         //Utility function to be called on mouseout a pie slice.
         function mouseout(d){
             // call the update function of histogram with all data.
-            hG.update(fData.map(function(v){
-                return [v.age_range, v.total];}), barColor);
+            hG.update(sF);
         }
         // Animating the pie-slice requiring a custom function which specifies
         // how the intermediate paths should be drawn.
@@ -198,21 +193,6 @@ function dashboard(id, fData){
         return leg;
     }
     
-    // calculate total frequency by gender for all states.
-//    var freq_by_gender = ['male', 'female'].map(function(gender) {return {type:gender, freq: d3.sum(fData)});
-    
-// calculate total frequency by segment for all state.
-//    var tF = ['male','female'].map(function(d){ 
-//        return {type:d, freq: d3.sum(fData.map(function(t){ 
-//            return t.freq[d];
-//        }))}; 
-//    });    
-    
-    // calculate total frequency by state for all segment.
-//    var sF = fData.map(function(d){return [d.age_range,d.total];});
-
-    //pie chart data is of the form:
-    //tF = [0:{type:"male", freq:400}, 1:{type:"female", freq:588}]
     var tF = [];
     tF.push({"type":"male",   "freq":fData.males});
     tF.push({"type":"female", "freq": fData.females});
