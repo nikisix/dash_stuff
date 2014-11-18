@@ -1,75 +1,100 @@
 function tooltipHtml(n, d) {
-  //console.log(d);
   return '<h4>' + n + '</h4><table>' +
-    '<tr><td>Low</td><td>' + (d.low) + '</td></tr>' +
-    '<tr><td>Average</td><td>' + (d.average) + '</td></tr>' +
-    '<tr><td>High</td><td>' + (d.high) + '</td></tr>' +
+    '<tr><td>Youngest</td><td>' + (d.youngest) + '</td></tr>' +
+    '<tr><td>Average_Age</td><td>' + (d.average_age) + '</td></tr>' +
+    '<tr><td>Oldest</td><td>' + (d.oldest) + '</td></tr>' +
     '</table>';
 }
 
+var outer_state = {};
+var NUM_HIST_BARS = 5;
+
 d3.csv('assets/csv/st_abv_gender_age.csv', function(res){
-  var dataByState = _.groupBy(res, 'state');
-  //console.log(dataByState);
+    var national = _.groupBy(res, 'state');
+    national.males = 0;
+    national.females = 0;
+    national.oldest = 0;
+    national.youngest = 100000;
 
-  _.each(dataByState, function(state, state_abv) {
+    _.each(national, function(state, state_abv) {
+        state.oldest = parseInt(_.max(state, function(s) {
+            return parseInt(s.age);
+        }).age);
+        if (national.oldest < state.oldest) { national.oldest = state.oldest; }
 
-    state.high = parseInt(_.max(state, function(s) {
-      return parseInt(s.age);
-    }).age);
+        state.youngest = parseInt(_.min(state, function(s) {
+            return parseInt(s.age);
+        }).age);
+        if (state.youngest < national.youngest) { national.youngest = state.youngest; }
+    });
 
-    state.low = parseInt(_.min(state, function(s) {
-      return parseInt(s.age);
-    }).age);
+    var national_bucket_size = Math.round((national.oldest - national.youngest) / NUM_HIST_BARS);
+    national_bucket_size = national_bucket_size == 0 ? 1 : national_bucket_size;
+    national_age_dist_male = {};
+    national_age_dist_female = {};
+    national_age_dist_total = {};
 
+  _.each(national, function(state, state_abv) {
+    outer_state[state_abv] = {};
     state.color = '#ccc';
 
-    var sum = 0; var male = 0; var female = 0; var bucket = 0;
-    var num_bars = 5;
-    //high, low == oldest, youngest
-    var bucket_size = Math.round((state.high - state.low) / num_bars);
+    var sum = 0; var bucket = 0;
+    var state_bucket_size = Math.round((state.oldest - state.youngest) / NUM_HIST_BARS);
+    var age_range = ''; var age_range_lower = 0; var age_range_upper = 0;
     //TODO is this right?
-    bucket_size = bucket_size == 0 ? 1 : bucket_size;
-    var age_dist_male = {};
-    var age_dist_female = {};
+    state.males = 0;
+    state.females = 0;
+    state_bucket_size = state_bucket_size == 0 ? 1 : state_bucket_size;
+    state.age_dist_male = {};
+    state.age_dist_female = {};
+    state.age_dist_total = {};
+
     _.each(state, function(s) {
         sum += parseInt(s.age);
-        bucket = Math.round(s.age/bucket_size);
+        bucket = Math.floor(s.age/national_bucket_size);
+        age_range_lower = bucket * national_bucket_size;
+        age_range_upper = (bucket+1) * national_bucket_size;
+        age_range = age_range_lower.toString() + '-' + age_range_upper.toString();
         if (s.gender == 'M') {
-            age_dist_male[bucket] = bucket in age_dist_male ? age_dist_male[bucket] + 1 : 1;
+            national.males += 1;
+            state.males    += 1; 
+            state.age_dist_male[age_range]    = age_range in state.age_dist_male    ? state.age_dist_male[age_range] + 1 : 1;
+            national_age_dist_male[age_range] = age_range in national_age_dist_male ? national_age_dist_male[age_range] + 1 : 1;
         } else { //gender == 'F'
-            age_dist_female[bucket] = bucket in age_dist_female ? age_dist_female[bucket] + 1 : 1;
+            national.females += 1;
+            state.females    += 1; 
+            state.age_dist_female[age_range] = age_range in state.age_dist_female ? state.age_dist_female[age_range] + 1 : 1;
+            national_age_dist_female[age_range] = age_range in national_age_dist_female ? national_age_dist_female[age_range] + 1 : 1;
         }
+        state.age_dist_total[age_range] = age_range in state.age_dist_total ? state.age_dist_total[age_range] + 1 : 1;
+        national_age_dist_total[age_range] = age_range in national_age_dist_total ? national_age_dist_total[age_range] + 1 : 1;
     });
-    
-    var freq_data = [];
-    _.each(age_dist_male, function(value, key) {
-        var lower = state.low + key * bucket_size;
-        var upper = lower + bucket_size;
-        var age_range = lower.toString() + '-' + upper.toString();
-        var freq = {age_dist_male[key], age_dist_female[key]};
-        freq_data.append([age_range, freq]);
-    });
-
-    state.male= male; state.female = female;
-    state.average = Math.round(sum / state.length);
-    state.freq_data = freq_data;
-    state.age_dist_male = age_dist_male;
-    state.age_dist_female = age_dist_female;
-    //console.log(state_abv, 'female', state.female,'male', state.female);
+    state.average_age = Math.round(sum/state.length);
   });
-  var freqData=[
-   {age_range:'10-20',freq:{male:4786, female:1319}}
-  ,{age_range:'20-30',freq:{male:1101, female:412}}
-  ,{age_range:'30-40',freq:{male:932,  female:2149}}
-  ,{age_range:'40-50',freq:{male:832,  female:1152}}
-  ,{age_range:'50-60',freq:{male:4481, female:303}}
-  ,{age_range:'60-70',freq:{male:1101, female:412}}
-  ,{age_range:'70-80',freq:{male:932,  female:2149}}
-  ,{age_range:'80-90',freq:{male:832,  female:1152}}
-  ,{age_range:'90-100',freq:{male:4481,female:303}}
-  ,{age_range:'100-110',freq:{male:441,female:303}}
-  ];
-
-  uStates.draw('#statesvg', dataByState, tooltipHtml);
-  dashboard('#dashboard', freq_data);
+    national.age_dist_male = national_age_dist_male;    
+    national.age_dist_female = national_age_dist_female;    
+    national.age_dist_total = national_age_dist_total;    
+    uStates.draw('#statesvg', national, tooltipHtml);
+    dashboard('#dashboard', national);
 });
+
+    //for each age in the age_distribution. keys should be the same for male and female
+//    var freq_data = [];//key is bucket number
+//    _.each(state.age_dist_male, function(value, key) {
+//        var youngest = key * national_bucket_size;
+//        var oldest = (key+1) * national_bucket_size;
+//        var age_range = youngest.toString() + '-' + oldest.toString();
+//        var freq = {};
+//        var freq_data_entry = {};
+//        freq['male']   = key in state.age_dist_male ? state.age_dist_male[key] : 0;
+//        freq['female'] = key in state.age_dist_female ? state.age_dist_female[key] : 0;
+//        freq_data_entry['age_range'] = age_range;
+//        freq_data_entry['freq'] = freq;
+//        freq_data.push(freq_data_entry);
+//    });
+
+//    outer_state[state_abv]['male'] = male; 
+//    outer_state[state_abv]['female'] = female;
+//    //outer_state[state_abv][freq_data]       = freq_data;
+//    outer_state[state_abv]['age_dist_male']   = age_dist_male;
+//    outer_state[state_abv]['age_dist_female'] = age_dist_female;

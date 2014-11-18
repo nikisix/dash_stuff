@@ -1,9 +1,24 @@
 function dashboard(id, fData){
     var barColor = 'steelblue';
-    function segColor(c){ return {men:"#807dba", women:"#e08214"}[c]; }
+    function segColor(c){ return {male:"#807dba", female:"#e08214"}[c]; }
     
-    // compute total for each state.
-    fData.forEach(function(d){d.total=d.freq.men+d.freq.women;});
+    //fData.forEach(function(d){
+        //d.total=d.freq.male+d.freq.female;
+    //compute total for each state.
+//    _.each(fData, function(state_list, state_abv) {
+//        console.log(state_abv);
+//        _.each(state_list, function(state) {
+//            var state_males   = 0;
+//            var state_females = 0;
+//            state.forEach(function(age_range) { 
+//                age_range.freq.total = age_range.freq.male + age_range.freq.female;
+//                state_males   += age_range.freq.male;
+//                state_females += age_range.freq.female;
+//                //console.log(age_range); 
+//            });
+//            state_list
+//        });
+//    });
     
     // function to handle histogram.
     function histoGram(fD){
@@ -20,7 +35,6 @@ function dashboard(id, fData){
         // create function for x-axis mapping.
         var x = d3.scale.ordinal().rangeRoundBands([0, hGDim.w], 0.1)
                 .domain(fD.map(function(d) { 
-                    console.log(d);
                     return d[0]; }));
 
         // Add x-axis to the histogram svg.
@@ -184,14 +198,36 @@ function dashboard(id, fData){
         return leg;
     }
     
-    // calculate total frequency by segment for all state.
-    var tF = ['men','women'].map(function(d){ 
-        return {type:d, freq: d3.sum(fData.map(function(t){ return t.freq[d];}))}; 
-    });    
+    // calculate total frequency by gender for all states.
+//    var freq_by_gender = ['male', 'female'].map(function(gender) {return {type:gender, freq: d3.sum(fData)});
+    
+// calculate total frequency by segment for all state.
+//    var tF = ['male','female'].map(function(d){ 
+//        return {type:d, freq: d3.sum(fData.map(function(t){ 
+//            return t.freq[d];
+//        }))}; 
+//    });    
     
     // calculate total frequency by state for all segment.
-    var sF = fData.map(function(d){return [d.age_range,d.total];});
+//    var sF = fData.map(function(d){return [d.age_range,d.total];});
 
+    //pie chart data is of the form:
+    //tF = [0:{type:"male", freq:400}, 1:{type:"female", freq:588}]
+    var tF = [];
+    tF.push({"type":"male",   "freq":fData.males});
+    tF.push({"type":"female", "freq": fData.females});
+
+    var age_ranges=_.sortBy(
+        _.keys(fData.age_dist_total),function(s){
+            return parseInt(s.split('-')[0]);
+        }
+    );
+
+    sF = [];
+    _.each(age_ranges, function(range) {
+        sF.push([range, fData.age_dist_total[range]]);
+    });
+        
     var hG = histoGram(sF), // create the histogram.
         pC = pieChart(tF), // create the pie-chart.
         leg= legend(tF);  // create the legend.
