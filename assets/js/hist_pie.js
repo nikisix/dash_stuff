@@ -1,6 +1,7 @@
 function dashboard(id, fData){
     var barColor = 'steelblue';
-    function segColor(c){ return {male:"#807dba", female:"#e08214"}[c]; }
+    function segColor(c){ return {male:'blue', female:'pink'}[c]; }
+    //function segColor(c){ return {male:"#807dba", female:"#e08214"}[c]; }
     
     // function to handle histogram.
     function histoGram(fD){
@@ -78,7 +79,8 @@ function dashboard(id, fData){
             bars.select("rect").transition().duration(500)
                 .attr("y", function(d) {return y(d[1]); })
                 .attr("height", function(d) { return hGDim.h - y(d[1]); })
-                .attr("fill", color);
+                .attr("fill", 'steelblue');
+                //.attr("fill", color);
 
             // transition the frequency labels location and change value.
             bars.select("text").transition().duration(500)

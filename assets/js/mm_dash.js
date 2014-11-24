@@ -47,7 +47,14 @@ d3.csv('assets/csv/st_abv_gender_age.csv', function(res){
     state_bucket_size = state_bucket_size == 0 ? 1 : state_bucket_size;
     state.age_dist_male = {};
     state.age_dist_female = {};
-    state.age_dist_total = {};
+    //state.age_dist_total = {};
+    age_dist_total = {};
+
+    for(i = national.youngest; i < national.oldest; i += national_bucket_size){
+        age_range = i.toString() + '-' + (i+national_bucket_size).toString();
+        age_dist_total[age_range] = 0;
+    }
+    state.age_dist_total = age_dist_total;
 
     _.each(state, function(s) { //every entry in state
         sum += parseInt(s.age);
@@ -55,6 +62,7 @@ d3.csv('assets/csv/st_abv_gender_age.csv', function(res){
         age_range_lower = bucket * national_bucket_size;
         age_range_upper = (bucket+1) * national_bucket_size;
         age_range = age_range_lower.toString() + '-' + age_range_upper.toString();
+
         if (s.gender == 'M') {
             national.males += 1;
             state.males    += 1; 
